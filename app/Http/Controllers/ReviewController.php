@@ -1,12 +1,12 @@
 <?php
-
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ReviewRequest;
 use App\Http\Resources\ReviewsResource;
 use App\Model\Product;
 use App\Model\Review;
 use Illuminate\Http\Request;
-
+use Symfony\Component\HttpFoundation\Response;
 class ReviewController extends Controller
 {
     /**
@@ -15,11 +15,9 @@ class ReviewController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Product $product)
-
     {
         return ReviewsResource::collection($product->reviews);
     }
-
     /**
      * Show the form for creating a new resource.
      *
@@ -29,18 +27,20 @@ class ReviewController extends Controller
     {
         //
     }
-
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ReviewRequest $request,Product $product)
     {
-        //
+        $review = new Review($request->all());
+        $product->reviews()->save($review);
+        return response([
+            'data' => new ReviewsResource($review)
+        ],Response::HTTP_CREATED);
     }
-
     /**
      * Display the specified resource.
      *
@@ -51,8 +51,16 @@ class ReviewController extends Controller
     {
         //
     }
-
- 
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\Model\Review  $review
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Review $review)
+    {
+        //
+    }
     /**
      * Update the specified resource in storage.
      *
@@ -60,19 +68,22 @@ class ReviewController extends Controller
      * @param  \App\Model\Review  $review
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Review $review)
+    public function update(Request $request,Product $product, Review $review)
     {
-        //
+        $review->update($request->all());
+        return response([
+            'data' => new ReviewsResource($review)
+        ],Response::HTTP_CREATED);
     }
-
     /**
      * Remove the specified resource from storage.
      *
      * @param  \App\Model\Review  $review
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Review $review)
+    public function destroy(Product $product,Review $review)
     {
-        //
+        $review->delete();
+        return response(null,Response::HTTP_NO_CONTENT);
     }
 }
